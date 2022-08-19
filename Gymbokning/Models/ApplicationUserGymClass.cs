@@ -2,7 +2,8 @@
 {
     public class ApplicationUserGymClass
     {
-        public int Id { get; set; }
+        //We could have an Id but we don't need an Id. New requirement says we should not have an Id
+        //public int Id { get; set; }
 
         //Foreign key
         public int GymClassId { get; set; }

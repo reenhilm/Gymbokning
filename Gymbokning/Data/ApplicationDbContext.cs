@@ -15,7 +15,9 @@ string>
         }
         public DbSet<GymClass> GymClass => Set<GymClass>();
         public DbSet<ApplicationUserGymClass> ApplicationUserGymClass => Set<ApplicationUserGymClass>();
-        public DbSet<ApplicationUser> Member => Set<ApplicationUser>();
+
+        //TODO There is already inherited DbSet for ApplicationUser called Users
+        //public DbSet<ApplicationUser> ApplicationUser => Set<ApplicationUser>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +33,10 @@ string>
             modelBuilder.Entity<GymClass>().HasData(
                 new GymClass { Id = 1, Description = "GymClassDescription", Name = "GymClassName", Duration = new TimeSpan(1,0,0), StartTime = DateTime.Now.AddHours(1) }
             );
+
+            //modelBuilder.Entity<IdentityRole>().HasData(                
+            //    new IdentityRole {  }
+            //);
         }
     }
 }
