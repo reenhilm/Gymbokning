@@ -10,18 +10,21 @@ using Gymbokning.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Gymbokning.Models.ViewModels;
+using AutoMapper;
 
 namespace Gymbokning.Controllers
 {
     public class GymClassesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper mapper;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMapper mapper)
         {
             _context = context;
             _userManager = userManager;
+            this.mapper = mapper;
         }
 
         // GET: GymClasses
@@ -66,17 +69,8 @@ namespace Gymbokning.Controllers
             if (id == null)
                 return NotFound();
 
-            var gymClass = await _context.GymClass
-                .Where(m => m.Id == id)
-                .Select(gc => new GymClassDetailsViewModel()
-                {
-                    Description = gc.Description,
-                    Duration = gc.Duration,
-                    Id = gc.Id,
-                    Name = gc.Name,
-                    StartTime = gc.StartTime,
-                    AttendingApplicationUserEmails = gc.ApplicationUsers.ToList().Select(v => v.Email)
-                }).FirstOrDefaultAsync();
+            var gymClass = await mapper.ProjectTo<GymClassDetailsViewModel>(_context.GymClass.Where(m => m.Id == id)).FirstOrDefaultAsync();
+
             if (gymClass == null)
                 return NotFound();
 
