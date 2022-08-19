@@ -8,7 +8,6 @@ public class SeedData
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IUserStore<ApplicationUser> _userStore;
     private readonly IUserEmailStore<ApplicationUser> _emailStore;
-    private readonly IEmailSender _emailSender;
 
     public SeedData(
         UserManager<ApplicationUser> userManager,
