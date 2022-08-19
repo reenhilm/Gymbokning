@@ -7,16 +7,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Gymbokning.Data;
 using Gymbokning.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Gymbokning.Models.ViewModels;
 
 namespace Gymbokning.Controllers
 {
     public class GymClassesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public GymClassesController(ApplicationDbContext context)
+        public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: GymClasses
@@ -27,20 +32,53 @@ namespace Gymbokning.Controllers
                           Problem("Entity set 'ApplicationDbContext.GymClass'  is null.");
         }
 
+        [Authorize]
+        public async Task<IActionResult> BookingToggle(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
+            if (loggedInUser == null)
+                return NotFound();
+
+            var SelectedGymClassForLoggedInUser = await _context.ApplicationUserGymClass
+                .AsTracking()
+                .Include(ugc => ugc.ApplicationUser)
+                .Include(ugc => ugc.GymClass)
+                .Where(ugc => ugc.ApplicationUser.Id == loggedInUser.Id && ugc.GymClass.Id == id)
+                .ToListAsync();
+
+            //has user not attended? then add user to that gymClass a.k.a. new row in junction-table ApplicationUserGymClass, else remove all rows in junction-table ApplicationUserGymClass
+            if (SelectedGymClassForLoggedInUser.Count == 0)
+                _context.Add(new ApplicationUserGymClass() { ApplicationUserId = loggedInUser.Id, GymClassId = id.GetValueOrDefault()! });
+            else
+                _context.ApplicationUserGymClass.RemoveRange(SelectedGymClassForLoggedInUser);
+            
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
         // GET: GymClasses/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.GymClass == null)
-            {
+            if (id == null)
                 return NotFound();
-            }
 
             var gymClass = await _context.GymClass
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Where(m => m.Id == id)
+                .Select(gc => new GymClassDetailsViewModel()
+                {
+                    Description = gc.Description,
+                    Duration = gc.Duration,
+                    Id = gc.Id,
+                    Name = gc.Name,
+                    StartTime = gc.StartTime,
+                    AttendingApplicationUserEmails = gc.ApplicationUsers.ToList().Select(v => v.Email)
+                }).FirstOrDefaultAsync();
             if (gymClass == null)
-            {
                 return NotFound();
-            }
 
             return View(gymClass);
         }

@@ -8,7 +8,7 @@
         public int GymClassId { get; set; }
 
         //Foreign key
-        public int ApplicationUserId { get; set; }
+        public string ApplicationUserId { get; set; }
 
         //Nav prop
         public ApplicationUser ApplicationUser { get; set; }
