@@ -1,7 +1,7 @@
-﻿using Gymbokning.Data;
-using Gymbokning.Models;
+﻿using Gymbokning.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 public class SeedData
 {
@@ -17,7 +17,7 @@ public class SeedData
         _userStore = userStore;
         _emailStore = GetEmailStore();
     }
-    public void Init()
+    public async Task InitAsync()
     {
         if (_userManager.Users.Any()) return;
 
@@ -26,17 +26,36 @@ public class SeedData
         //await db.AddRangeAsync(users);
         //await db.SaveChangesAsync();
 
-        roles.ToList().ForEach(async r => await _roleManager.CreateAsync(r));
+        foreach (var role in roles)
+            await _roleManager.CreateAsync(role);
 
-        users.ToList().ForEach(async u => {
+        foreach(var seedUser in users)
+        {
             var user = CreateUser();
-            await _userStore.SetUserNameAsync(user, u.Email, CancellationToken.None);
-            await _emailStore.SetEmailAsync(user, u.Email, CancellationToken.None);
-            var result = await _userManager.CreateAsync(user, u.Password);
-            //var userId = await _userManager.GetUserIdAsync(user);
-            /*var code = */
-            await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        });
+            await _userStore.SetUserNameAsync(user, seedUser.Email, CancellationToken.None);
+            await _emailStore.SetEmailAsync(user, seedUser.Email, CancellationToken.None);
+            await _userManager.CreateAsync(user, seedUser.Password);
+
+            await ConfirmUser(seedUser, user);
+        }
+    }
+
+    private async Task ConfirmUser(SeedUserDTO seedUser, ApplicationUser user)
+    {
+        //inRegister
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        foreach (var role in seedUser.Roles)
+            await _userManager.AddToRoleAsync(user, role);
+
+        code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+
+        //inRegisterConfirmation
+        var code2 = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        code2 = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code2));
+
+        //inConfirmEmail
+        var code3 = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code2));
+        await _userManager.ConfirmEmailAsync(user, code3);
     }
 
     private IUserEmailStore<ApplicationUser> GetEmailStore()
@@ -71,11 +90,7 @@ public class SeedData
         };
         return members;
     }
-    private static IEnumerable<IdentityRole> GenerateRoles()
-    {
-        var roles = new List<IdentityRole>() { new IdentityRole() { Name = RoleNames.AdminRole } };
-        return roles;
-    }
+    private static IEnumerable<IdentityRole> GenerateRoles() => new List<IdentityRole>() { new IdentityRole() { Name = RoleNames.AdminRole } };
 
     private static IEnumerable<SeedUserDTO> GenerateSeedUserDTO(int iMembers) => GenerateSeedUserDTO().Take(iMembers);
 }

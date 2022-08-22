@@ -12,6 +12,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+//Dimitris tycker RequireConfirmedAccount �r "on�digt" f�r detta projekt
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -32,7 +33,7 @@ try
     //Maybe no need to call the scopes serviceProvider?
     using var nestedScope = scope.ServiceProvider.CreateScope();
     var seedData = nestedScope.ServiceProvider.GetRequiredService<SeedData>();
-    seedData.Init();
+    await seedData.InitAsync();
 }
 catch (Exception ex)
 {
