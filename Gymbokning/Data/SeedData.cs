@@ -26,10 +26,21 @@ public class SeedData
         //await db.AddRangeAsync(users);
         //await db.SaveChangesAsync();
 
-        foreach (var role in roles)
-            await _roleManager.CreateAsync(role);
+        //https://stackoverflow.com/questions/18667633/how-can-i-use-async-with-foreach
+        /* fungerar ej:
+          roles.ToList().ForEach(async r => await _roleManager.CreateAsync(r)); */
 
-        foreach(var seedUser in users)
+        /* fungerar men fult?
+        using (RoleManager<IdentityRole> rm = _roleManager)
+        { 
+            var tasks = roles.ToList().Select(r => rm.CreateAsync(r));
+            var results = await Task.WhenAll(tasks);
+        }
+        */
+
+        await Parallel.ForEachAsync(roles.ToList(), async (i, CancellationToken) => await _roleManager.CreateAsync(i));
+
+        foreach (var seedUser in users)
         {
             var user = CreateUser();
             await _userStore.SetUserNameAsync(user, seedUser.Email, CancellationToken.None);
@@ -39,15 +50,15 @@ public class SeedData
             foreach (var role in seedUser.Roles)
                 await _userManager.AddToRoleAsync(user, role);
 
-            await ConfirmUser(seedUser, user);
+            await ConfirmUser(user);
         }
     }
 
-    private async Task ConfirmUser(SeedUserDTO seedUser, ApplicationUser user)
+    private async Task ConfirmUser(ApplicationUser user)
     {
         //inRegister
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+        await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        //code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
 
         //inRegisterConfirmation
         var code2 = await _userManager.GenerateEmailConfirmationTokenAsync(user);
