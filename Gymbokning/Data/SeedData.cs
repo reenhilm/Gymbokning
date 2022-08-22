@@ -36,6 +36,9 @@ public class SeedData
             await _emailStore.SetEmailAsync(user, seedUser.Email, CancellationToken.None);
             await _userManager.CreateAsync(user, seedUser.Password);
 
+            foreach (var role in seedUser.Roles)
+                await _userManager.AddToRoleAsync(user, role);
+
             await ConfirmUser(seedUser, user);
         }
     }
@@ -44,9 +47,6 @@ public class SeedData
     {
         //inRegister
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        foreach (var role in seedUser.Roles)
-            await _userManager.AddToRoleAsync(user, role);
-
         code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
 
         //inRegisterConfirmation
