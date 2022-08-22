@@ -9,10 +9,10 @@
         public int GymClassId { get; set; }
 
         //Foreign key
-        public string ApplicationUserId { get; set; }
+        public string ApplicationUserId { get; set; } = null!;
 
         //Nav prop
-        public ApplicationUser ApplicationUser { get; set; }
-        public GymClass GymClass { get; set; }
+        public ApplicationUser ApplicationUser { get; set; } = null!;
+        public GymClass GymClass { get; set; } = null!;
     }
 }

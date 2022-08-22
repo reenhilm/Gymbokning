@@ -8,34 +8,35 @@ public class SeedData
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IUserStore<ApplicationUser> _userStore;
     private readonly IUserEmailStore<ApplicationUser> _emailStore;
+    private readonly RoleManager<IdentityRole> _roleManager;
 
-    public SeedData(
-        UserManager<ApplicationUser> userManager,
-        IUserStore<ApplicationUser> userStore)
+    public SeedData(UserManager<ApplicationUser> userManager, IUserStore<ApplicationUser> userStore, RoleManager<IdentityRole> roleManager)
     {
+        _roleManager = roleManager;
         _userManager = userManager;
         _userStore = userStore;
         _emailStore = GetEmailStore();
     }
-    public async Task InitAsync()
+    public void Init()
     {
         if (_userManager.Users.Any()) return;
 
-        var users = GenerateApplicationUsers(1);
+        var roles= GenerateRoles();
+        var users = GenerateSeedUserDTO(2);
         //await db.AddRangeAsync(users);
         //await db.SaveChangesAsync();
 
-        var user = CreateUser();
+        roles.ToList().ForEach(async r => await _roleManager.CreateAsync(r));
 
-        foreach (var item in users)
-        { 
-            await _userStore.SetUserNameAsync(user, item.Email, CancellationToken.None);
-            await _emailStore.SetEmailAsync(user, item.Email, CancellationToken.None);
-            var result = await _userManager.CreateAsync(user, "Testar123!");
+        users.ToList().ForEach(async u => {
+            var user = CreateUser();
+            await _userStore.SetUserNameAsync(user, u.Email, CancellationToken.None);
+            await _emailStore.SetEmailAsync(user, u.Email, CancellationToken.None);
+            var result = await _userManager.CreateAsync(user, u.Password);
             //var userId = await _userManager.GetUserIdAsync(user);
-            /*var code = */await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-        }
+            /*var code = */
+            await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        });
     }
 
     private IUserEmailStore<ApplicationUser> GetEmailStore()
@@ -61,15 +62,20 @@ public class SeedData
         }
     }
 
-    private static IEnumerable<ApplicationUser> GenerateApplicationUsers(int iMembers)
+    private static IEnumerable<SeedUserDTO> GenerateSeedUserDTO()
     {
-        var members = new List<ApplicationUser>()
+        var members = new List<SeedUserDTO>()
         {
-            new ApplicationUser()
-            {
-                Email = "testar@gmail.com"
-            }
+            new SeedUserDTO() { Email = "christian@kajal.se", Password = "Testar123!" },
+            new SeedUserDTO() { Email = "admin@Gymbokning.se", Password = "Testar123!", Roles = new List<string>() { RoleNames.AdminRole } }
         };
         return members;
     }
+    private static IEnumerable<IdentityRole> GenerateRoles()
+    {
+        var roles = new List<IdentityRole>() { new IdentityRole() { Name = RoleNames.AdminRole } };
+        return roles;
+    }
+
+    private static IEnumerable<SeedUserDTO> GenerateSeedUserDTO(int iMembers) => GenerateSeedUserDTO().Take(iMembers);
 }

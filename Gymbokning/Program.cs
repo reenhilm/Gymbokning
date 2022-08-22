@@ -32,7 +32,7 @@ try
     //Maybe no need to call the scopes serviceProvider?
     using var nestedScope = scope.ServiceProvider.CreateScope();
     var seedData = nestedScope.ServiceProvider.GetRequiredService<SeedData>();
-    await seedData.InitAsync();
+    seedData.Init();
 }
 catch (Exception ex)
 {
