@@ -28,12 +28,7 @@ namespace Gymbokning.Controllers
         }
 
         // GET: GymClasses
-        public async Task<IActionResult> Index()
-        {
-              return _context.GymClass != null ? 
-                          View(await _context.GymClass.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.GymClass'  is null.");
-        }
+        public async Task<IActionResult> Index() => View(await _context.GymClass.ToListAsync());
 
         [Authorize]
         public async Task<IActionResult> BookingToggle(int? id)
@@ -67,22 +62,19 @@ namespace Gymbokning.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-                return NotFound();
+                return BadRequest();
 
             var gymClass = await mapper.ProjectTo<GymClassDetailsViewModel>(_context.GymClass.Where(m => m.Id == id)).FirstOrDefaultAsync();
 
             if (gymClass == null)
-                return NotFound();
+                return NoContent();
 
             return View(gymClass);
         }
 
         // GET: GymClasses/Create
         [Authorize(Roles = RoleNames.AdminRole)]
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
         // POST: GymClasses/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -105,16 +97,13 @@ namespace Gymbokning.Controllers
         [Authorize(Roles = RoleNames.AdminRole)]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.GymClass == null)
-            {
-                return NotFound();
-            }
+            if (id == null)
+                return BadRequest();
 
             var gymClass = await _context.GymClass.FindAsync(id);
             if (gymClass == null)
-            {
-                return NotFound();
-            }
+                return NoContent();
+
             return View(gymClass);
         }
 
@@ -127,9 +116,7 @@ namespace Gymbokning.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,StartTime,Duration,Description")] GymClass gymClass)
         {
             if (id != gymClass.Id)
-            {
-                return NotFound();
-            }
+                return BadRequest();
 
             if (ModelState.IsValid)
             {
@@ -141,13 +128,9 @@ namespace Gymbokning.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!GymClassExists(gymClass.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -158,17 +141,13 @@ namespace Gymbokning.Controllers
         [Authorize(Roles = RoleNames.AdminRole)]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.GymClass == null)
-            {
-                return NotFound();
-            }
+            if (id == null)
+                return BadRequest();
 
             var gymClass = await _context.GymClass
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (gymClass == null)
-            {
-                return NotFound();
-            }
+                return NoContent();
 
             return View(gymClass);
         }
@@ -179,23 +158,14 @@ namespace Gymbokning.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.GymClass == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.GymClass'  is null.");
-            }
             var gymClass = await _context.GymClass.FindAsync(id);
             if (gymClass != null)
-            {
                 _context.GymClass.Remove(gymClass);
-            }
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool GymClassExists(int id)
-        {
-          return (_context.GymClass?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+        private bool GymClassExists(int id) => (_context.GymClass?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }

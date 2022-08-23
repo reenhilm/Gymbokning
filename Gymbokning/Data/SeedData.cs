@@ -96,8 +96,8 @@ public class SeedData
     {
         var members = new List<SeedUserDTO>()
         {
-            new SeedUserDTO() { Email = "christian@kajal.se", Password = "Testar123!" },
-            new SeedUserDTO() { Email = "admin@Gymbokning.se", Password = "Testar123!", Roles = new List<string>() { RoleNames.AdminRole } }
+            new SeedUserDTO() { Email = "christian@kajal.se", Password = "Testar123!", FirstName = "Christian", LastName = "Rönnholm" },
+            new SeedUserDTO() { Email = "admin@Gymbokning.se", Password = "Testar123!", Roles = new List<string>() { RoleNames.AdminRole }, FirstName = "AdminFirstName", LastName = "AdminLastName" }
         };
         return members;
     }

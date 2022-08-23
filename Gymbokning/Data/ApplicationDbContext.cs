@@ -30,6 +30,10 @@ string>
                 va => va.HasOne(va => va.GymClass).WithMany(v => v.ApplicationUserGymClasses),
                 va => va.HasOne(va => va.ApplicationUser).WithMany(v => v.ApplicationUserGymClasses));
 
+            modelBuilder.Entity<ApplicationUser>()
+                .Property<DateTime>("TimeOfRegistration")
+                .HasDefaultValueSql("GetDate()"); ;
+
             modelBuilder.Entity<GymClass>().HasData(
                 new GymClass { Id = 1, Description = "GymClassDescription", Name = "GymClassName", Duration = new TimeSpan(1,0,0), StartTime = DateTime.Now.AddHours(1) }
             );
