@@ -34,7 +34,7 @@ namespace Gymbokning.Controllers
         public async Task<IActionResult> BookingToggle(int? id)
         {
             if (id == null)
-                return NotFound();
+                return BadRequest();
 
             var loggedInUser = await _userManager.GetUserAsync(HttpContext.User);
             if (loggedInUser == null)
@@ -67,7 +67,7 @@ namespace Gymbokning.Controllers
             var gymClass = await mapper.ProjectTo<GymClassDetailsViewModel>(_context.GymClass.Where(m => m.Id == id)).FirstOrDefaultAsync();
 
             if (gymClass == null)
-                return NoContent();
+                return NotFound();
 
             return View(gymClass);
         }
@@ -102,7 +102,7 @@ namespace Gymbokning.Controllers
 
             var gymClass = await _context.GymClass.FindAsync(id);
             if (gymClass == null)
-                return NoContent();
+                return NotFound();
 
             return View(gymClass);
         }
@@ -147,7 +147,7 @@ namespace Gymbokning.Controllers
             var gymClass = await _context.GymClass
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (gymClass == null)
-                return NoContent();
+                return NotFound();
 
             return View(gymClass);
         }
