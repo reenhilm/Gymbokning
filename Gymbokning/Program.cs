@@ -26,9 +26,10 @@ builder.Services.Configure<PasswordSettings>(_configuration.GetSection("Identity
 //    });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-//Dimitris tycker RequireConfirmedAccount är "onödigt" för detta projekt
+
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
+    //Dimitris tycker RequireConfirmedAccount är "onödigt" för detta projekt, men såg det som en utmaning att följa flödet för att göra confirm och få seeds som är confirmed också
     options.SignIn.RequireConfirmedAccount = true;
     options.Password.RequireDigit = false;
     options.Password.RequireNonAlphanumeric = false;
