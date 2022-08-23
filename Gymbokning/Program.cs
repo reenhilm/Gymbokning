@@ -11,6 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+var _configuration = builder.Configuration;
+builder.Services.AddSingleton(_configuration.GetSection("IdentityUser").Get<PasswordSettings>());
+builder.Services.Configure<PasswordSettings>(_configuration.GetSection("IdentityUser").Bind);
+
 //builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 //    .AddCookie(o => o.Events = new CookieAuthenticationEvents()
 //    {
@@ -21,7 +26,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 //    });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-//Dimitris tycker RequireConfirmedAccount �r "on�digt" f�r detta projekt
+//Dimitris tycker RequireConfirmedAccount är "onödigt" för detta projekt
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true;

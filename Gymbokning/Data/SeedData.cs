@@ -1,6 +1,7 @@
 ﻿using Gymbokning.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using System.Text;
 
 public class SeedData
@@ -9,20 +10,22 @@ public class SeedData
     private readonly IUserStore<ApplicationUser> _userStore;
     private readonly IUserEmailStore<ApplicationUser> _emailStore;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IOptions<PasswordSettings> _options;
 
-    public SeedData(UserManager<ApplicationUser> userManager, IUserStore<ApplicationUser> userStore, RoleManager<IdentityRole> roleManager)
+    public SeedData(UserManager<ApplicationUser> userManager, IUserStore<ApplicationUser> userStore, RoleManager<IdentityRole> roleManager, IOptions<PasswordSettings> options)
     {
         _roleManager = roleManager;
         _userManager = userManager;
         _userStore = userStore;
         _emailStore = GetEmailStore();
+        _options = options;
     }
     public async Task InitAsync()
     {
         if (_userManager.Users.Any()) return;
 
         var roles= GenerateRoles();
-        var users = GenerateSeedUserDTO(2);
+        var users = GenerateSeedUserDTO(2, _options);
         //await db.AddRangeAsync(users);
         //await db.SaveChangesAsync();
 
@@ -92,16 +95,18 @@ public class SeedData
         }
     }
 
-    private static IEnumerable<SeedUserDTO> GenerateSeedUserDTO()
+    private static IEnumerable<SeedUserDTO> GenerateSeedUserDTO(IOptions<PasswordSettings> options)
     {
+        var adminPWD = options.Value.AdminPassword;
+        var basicPWD = options.Value.BasicPassword;
         var members = new List<SeedUserDTO>()
         {
-            new SeedUserDTO() { Email = "christian@kajal.se", Password = "Testar123!", FirstName = "Christian", LastName = "Rönnholm" },
-            new SeedUserDTO() { Email = "admin@Gymbokning.se", Password = "Testar123!", Roles = new List<string>() { RoleNames.AdminRole }, FirstName = "AdminFirstName", LastName = "AdminLastName" }
+            new SeedUserDTO() { Email = "christian@kajal.se", Password = basicPWD, FirstName = "Christian", LastName = "Rönnholm" },
+            new SeedUserDTO() { Email = "admin@Gymbokning.se", Password = adminPWD, Roles = new List<string>() { RoleNames.AdminRole }, FirstName = "AdminFirstName", LastName = "AdminLastName" }
         };
         return members;
     }
     private static IEnumerable<IdentityRole> GenerateRoles() => new List<IdentityRole>() { new IdentityRole() { Name = RoleNames.AdminRole } };
 
-    private static IEnumerable<SeedUserDTO> GenerateSeedUserDTO(int iMembers) => GenerateSeedUserDTO().Take(iMembers);
+    private static IEnumerable<SeedUserDTO> GenerateSeedUserDTO(int iMembers, IOptions<PasswordSettings> options) => GenerateSeedUserDTO(options).Take(iMembers);
 }

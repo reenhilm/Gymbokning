@@ -8,11 +8,11 @@ namespace Gymbokning.Models
         [Required]
         [StringLength(50, MinimumLength = 3)]
         [Display(Name = "First Name")]
-        string FirstName { get; set; } = null!;
+        string FirstName { get; set; } = default!;
         [Required]
         [StringLength(50, MinimumLength = 3)]
         [Display(Name = "Last Name")]
-        string LastName { get; set; } = null!;
+        string LastName { get; set; } = default!;
         [Display(Name = "Full Name")]
         string FullName => $"{FirstName} {LastName}";
 
