@@ -28,7 +28,11 @@ namespace Gymbokning.Controllers
         }
 
         // GET: GymClasses
-        public async Task<IActionResult> Index() => View(await _context.GymClass.ToListAsync());
+        public async Task<IActionResult> Index()
+        {
+            var retGymClasses = await mapper.ProjectTo<IndexGymClassViewModel>(_context.GymClass.Include(g => g.ApplicationUserGymClasses)).ToListAsync();
+            return View(retGymClasses);
+        }
 
         [Authorize]
         public async Task<IActionResult> BookingToggle(int? id)
