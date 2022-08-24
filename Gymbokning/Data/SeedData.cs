@@ -48,6 +48,8 @@ public class SeedData
             var user = CreateUser();
             await _userStore.SetUserNameAsync(user, seedUser.Email, CancellationToken.None);
             await _emailStore.SetEmailAsync(user, seedUser.Email, CancellationToken.None);
+            user.FirstName = seedUser.FirstName;
+            user.LastName = seedUser.LastName;
             await _userManager.CreateAsync(user, seedUser.Password);
 
             foreach (var role in seedUser.Roles)

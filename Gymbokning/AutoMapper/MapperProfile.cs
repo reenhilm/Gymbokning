@@ -11,7 +11,7 @@ namespace Gymbokning.AutoMapper
             CreateMap<GymClass, GymClassDetailsViewModel>()
                 .ForMember(
                 dest => dest.AttendingApplicationUserEmails,
-                from => from.MapFrom(s => s.ApplicationUsers.ToList().Select(v => v.Email)));
+                from => from.MapFrom(s => s.ApplicationUsers.ToList().Select(v => v.FullName)));
         }
     }
 }

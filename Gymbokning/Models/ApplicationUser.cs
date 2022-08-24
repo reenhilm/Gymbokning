@@ -8,13 +8,13 @@ namespace Gymbokning.Models
         [Required]
         [StringLength(50, MinimumLength = 3)]
         [Display(Name = "First Name")]
-        string FirstName { get; set; } = default!;
+        public string FirstName { get; set; } = default!;
         [Required]
         [StringLength(50, MinimumLength = 3)]
         [Display(Name = "Last Name")]
-        string LastName { get; set; } = default!;
+        public string LastName { get; set; } = default!;
         [Display(Name = "Full Name")]
-        string FullName => $"{FirstName} {LastName}";
+        public string FullName => $"{FirstName} {LastName}";
 
         //Nav prop
         public ICollection<GymClass> GymClasses { get; set; } = new List<GymClass>();
