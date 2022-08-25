@@ -4,7 +4,7 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>@(Model.ShowHistory ? "historiska " : "")@(Model.HasBooking ? "bokade " : "")Gympass</h1>
 
 <p>
     @if (User.Identity.IsAuthenticated && User.IsInRole(Gymbokning.Models.RoleNames.AdminRole))
