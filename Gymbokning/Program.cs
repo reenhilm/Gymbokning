@@ -21,7 +21,7 @@ builder.Services.Configure<PasswordSettings>(_configuration.GetSection("Identity
 //    {
 //        OnValidatePrincipal = async (c) =>
 //        {
-//            c.RejectPrincipal;
+//            c.RejectPrincipal();
 //        }
 //    });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();

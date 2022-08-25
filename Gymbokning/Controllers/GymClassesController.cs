@@ -28,14 +28,17 @@ namespace Gymbokning.Controllers
         }
 
         // GET: GymClasses
-        public async Task<IActionResult> Index(bool showhistory)
+        public async Task<IActionResult> Index(bool showHistory, bool hasBooking)
         {
             var retGymClassesVM = new IndexViewModel();
 
             retGymClassesVM.GymClasses = await mapper.ProjectTo<IndexGymClassViewModel>(_context.GymClass
                 .Include(g => g.ApplicationUserGymClasses)
-                .WhereIf(!showhistory, g => g.StartTime > DateTime.Now)).ToListAsync();
-            retGymClassesVM.ShowHistory = showhistory;
+                .WhereIf(!showHistory, g => g.StartTime > DateTime.Now)
+                .WhereIf(hasBooking, g => g.ApplicationUserGymClasses.Count > 0)
+                ).ToListAsync();
+            retGymClassesVM.ShowHistory = showHistory;
+            retGymClassesVM.HasBooking = hasBooking;
             return View(retGymClassesVM);
         }
 

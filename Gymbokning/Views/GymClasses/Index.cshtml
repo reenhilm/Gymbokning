@@ -9,9 +9,9 @@
 <p>
     @if (User.Identity.IsAuthenticated && User.IsInRole(Gymbokning.Models.RoleNames.AdminRole))
     {
-        <a asp-action="Create">Create New</a>
+        <div><a asp-action="Create">Create New</a></div>
     }
-    <a asp-action="Index" asp-route-showhistory="@(!Model.ShowHistory)">Visa @if(Model.ShowHistory) @Html.Raw("alla") else @Html.Raw("historiska")</a>
+    <div><a asp-action="Index" asp-route-showhistory="@(!Model.ShowHistory)">Visa @if(Model.ShowHistory) @Html.Raw("alla") else @Html.Raw("historiska")</a></div>
 </p>
 <table class="table">
     <thead>
