@@ -6,7 +6,7 @@
         public string Name { get; set; } = default!;
         public DateTime StartTime { get; set; }
         public TimeSpan Duration { get; set; }
-        public bool bIsBooked { get; set; }
+        public bool IsBooked { get; set; }
         public string Description { get; set; } = default!;
     }
 }

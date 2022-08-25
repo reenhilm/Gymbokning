@@ -28,10 +28,15 @@ namespace Gymbokning.Controllers
         }
 
         // GET: GymClasses
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool showhistory)
         {
-            var retGymClasses = await mapper.ProjectTo<IndexGymClassViewModel>(_context.GymClass.Include(g => g.ApplicationUserGymClasses)).ToListAsync();
-            return View(retGymClasses);
+            var retGymClassesVM = new IndexViewModel();
+
+            retGymClassesVM.GymClasses = await mapper.ProjectTo<IndexGymClassViewModel>(_context.GymClass
+                .Include(g => g.ApplicationUserGymClasses)
+                .WhereIf(!showhistory, g => g.StartTime > DateTime.Now)).ToListAsync();
+            retGymClassesVM.ShowHistory = showhistory;
+            return View(retGymClassesVM);
         }
 
         [Authorize]

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<IndexGymClassViewModel>
+﻿@model IndexViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -11,27 +11,28 @@
     {
         <a asp-action="Create">Create New</a>
     }
+    <a asp-action="Index" asp-route-showhistory="@(!Model.ShowHistory)">Visa @if(Model.ShowHistory) @Html.Raw("alla") else @Html.Raw("historiska")</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.DisplayNameFor(model => model.GymClasses.First().Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.StartTime)
+                @Html.DisplayNameFor(model => model.GymClasses.First().StartTime)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Duration)
+                @Html.DisplayNameFor(model => model.GymClasses.First().Duration)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.GymClasses.First().Description)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.GymClasses) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
@@ -46,7 +47,7 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                    @if(User.Identity.IsAuthenticated){<a asp-action="BookingToggle" asp-route-id="@item.Id">@if (item.bIsBooked) { <span>Cancel booking</span> } else { <span>Book</span> }</a><span> | </span>
+                    @if(User.Identity.IsAuthenticated){<a asp-action="BookingToggle" asp-route-id="@item.Id">@if (item.IsBooked) { <span>Cancel booking</span> } else { <span>Book</span> }</a><span> | </span>
                     }
                     @if(User.Identity.IsAuthenticated && User.IsInRole(Gymbokning.Models.RoleNames.AdminRole)){<a asp-action="Edit" asp-route-id="@item.Id">Edit</a><span> | </span> }
                 @if(User.Identity.IsAuthenticated && User.IsInRole(Gymbokning.Models.RoleNames.AdminRole)){<a asp-action="Delete" asp-route-id="@item.Id">Delete</a><span> | </span> }

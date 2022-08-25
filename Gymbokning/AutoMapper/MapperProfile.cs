@@ -15,7 +15,7 @@ namespace Gymbokning.AutoMapper
 
             CreateMap<GymClass, IndexGymClassViewModel>()
                 .ForMember(
-                dest => dest.bIsBooked,
+                dest => dest.IsBooked,
                 from => from.MapFrom(s => s.ApplicationUserGymClasses.Any()));
         }
     }

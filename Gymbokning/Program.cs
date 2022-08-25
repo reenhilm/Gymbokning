@@ -42,13 +42,13 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddAutoMapper(typeof(MapperProfile));
-builder.Services.AddScoped<SeedData>();
+builder.Services.AddScoped<ISeedData, SeedData>();
 
 var app = builder.Build();
 
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-/*
+
 db.Database.EnsureDeleted();
 db.Database.Migrate();
 
@@ -56,7 +56,7 @@ try
 {
     //Maybe no need to call the scopes serviceProvider?
     using var nestedScope = scope.ServiceProvider.CreateScope();
-    var seedData = nestedScope.ServiceProvider.GetRequiredService<SeedData>();
+    var seedData = nestedScope.ServiceProvider.GetRequiredService<ISeedData>();
     await seedData.InitAsync();
 }
 catch (Exception ex)
@@ -64,7 +64,6 @@ catch (Exception ex)
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     logger.LogError(String.Join(" ", ex.Message));
 }
-*/
 
 
 // Configure the HTTP request pipeline.
