@@ -33,6 +33,7 @@ namespace Gymbokning.Controllers
             var retGymClassesVM = new IndexViewModel();
 
             retGymClassesVM.GymClasses = await mapper.ProjectTo<IndexGymClassViewModel>(_context.GymClass
+                .AsNoTracking()
                 .Include(g => g.ApplicationUserGymClasses)
                 .WhereIf(!showHistory, g => g.StartTime > DateTime.Now)
                 .WhereIf(hasBooking, g => g.ApplicationUserGymClasses.Count > 0)
@@ -76,7 +77,7 @@ namespace Gymbokning.Controllers
             if (id == null)
                 return BadRequest();
 
-            var gymClass = await mapper.ProjectTo<GymClassDetailsViewModel>(_context.GymClass.Where(m => m.Id == id)).FirstOrDefaultAsync();
+            var gymClass = await mapper.ProjectTo<GymClassDetailsViewModel>(_context.GymClass.AsNoTracking().Where(m => m.Id == id)).FirstOrDefaultAsync();
 
             if (gymClass == null)
                 return NotFound();
