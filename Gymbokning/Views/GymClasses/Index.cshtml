@@ -47,7 +47,7 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                    @if(User.Identity.IsAuthenticated){<a asp-action="BookingToggle" asp-route-id="@item.Id">@if (item.IsBooked) { <span>Cancel booking</span> } else { <span>Book</span> }</a><span> | </span>
+                    @if(User.Identity.IsAuthenticated){<a asp-action="BookingToggle" asp-route-hasbooking=@Model.HasBooking asp-route-showhistory="@(Model.ShowHistory)" asp-route-id="@item.Id">@if (item.IsBooked) { <span>Cancel booking</span> } else { <span>Book</span> }</a><span> | </span>
                     }
                     @if(User.Identity.IsAuthenticated && User.IsInRole(Gymbokning.Models.RoleNames.AdminRole)){<a asp-action="Edit" asp-route-id="@item.Id">Edit</a><span> | </span> }
                 @if(User.Identity.IsAuthenticated && User.IsInRole(Gymbokning.Models.RoleNames.AdminRole)){<a asp-action="Delete" asp-route-id="@item.Id">Delete</a><span> | </span> }

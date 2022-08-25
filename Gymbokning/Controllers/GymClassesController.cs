@@ -44,7 +44,7 @@ namespace Gymbokning.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> BookingToggle(int? id)
+        public async Task<IActionResult> BookingToggle(int? id, bool showHistory, bool hasBooking)
         {
             if (id == null)
                 return BadRequest();
@@ -68,7 +68,11 @@ namespace Gymbokning.Controllers
             
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            var routeValues = new RouteValueDictionary {
+              { "showHistory", showHistory },
+              { "hasBooking", hasBooking }
+            };
+            return RedirectToAction(nameof(Index), routeValues);
         }
 
         // GET: GymClasses/Details/5
