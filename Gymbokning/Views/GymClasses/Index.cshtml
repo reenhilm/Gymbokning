@@ -11,7 +11,7 @@
     {
         <div><a asp-action="Create">Create New</a></div>
     }
-    <div><a asp-action="Index" asp-route-showhistory="@(!Model.ShowHistory)">Visa @if(Model.ShowHistory) @Html.Raw("alla") else @Html.Raw("historiska")</a></div>
+    <div><a asp-action="Index" asp-route-hasbooking=@Model.HasBooking asp-route-showhistory="@(!Model.ShowHistory)">Visa @(Model.ShowHistory ? "kommande" : "historiska")</a></div>
 </p>
 <table class="table">
     <thead>
