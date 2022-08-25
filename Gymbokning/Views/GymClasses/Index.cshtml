@@ -35,7 +35,7 @@
 @foreach (var item in Model.GymClasses) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Name)
+                <a asp-action="Details" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Name)</a>                
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.StartTime)
@@ -47,11 +47,10 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                    @if(User.Identity.IsAuthenticated){<a asp-action="BookingToggle" asp-route-hasbooking=@Model.HasBooking asp-route-showhistory="@(Model.ShowHistory)" asp-route-id="@item.Id">@if (item.IsBooked) { <span>Cancel booking</span> } else { <span>Book</span> }</a><span> | </span>
+                    @if(User.Identity.IsAuthenticated){<a asp-action="BookingToggle" class="btn btn-@(item.IsBooked ? "danger " : "success")" asp-route-hasbooking=@Model.HasBooking asp-route-showhistory="@(Model.ShowHistory)" asp-route-id="@item.Id">@if (item.IsBooked) { <span>Cancel booking</span> } else { <span>Book</span> }</a>
                     }
                     @if(User.Identity.IsAuthenticated && User.IsInRole(Gymbokning.Models.RoleNames.AdminRole)){<a asp-action="Edit" asp-route-id="@item.Id">Edit</a><span> | </span> }
-                @if(User.Identity.IsAuthenticated && User.IsInRole(Gymbokning.Models.RoleNames.AdminRole)){<a asp-action="Delete" asp-route-id="@item.Id">Delete</a><span> | </span> }
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                @if(User.Identity.IsAuthenticated && User.IsInRole(Gymbokning.Models.RoleNames.AdminRole)){<a asp-action="Delete" asp-route-id="@item.Id">Delete</a><span> | </span> }                
             </td>
         </tr>
 }

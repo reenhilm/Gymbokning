@@ -1,0 +1,8 @@
+﻿@import "../lib/bootstrap/scss/_functions";
+@import "../lib/bootstrap/scss/_variables";
+
+$white: #ffffff;
+
+$theme-colors: ( "light": #f8d8e6, "dark": #010000, "primary": #221fb3, "secondary": #cf3335, "info": #eb6906, "success": #029e5c, "warning": #dfca02, "danger": #ed1e01, );
+
+@import "../lib/bootstrap/scss/bootstrap";
