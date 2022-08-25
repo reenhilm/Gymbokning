@@ -34,10 +34,6 @@ string>
                 .Property<DateTime>("TimeOfRegistration")
                 .HasDefaultValueSql("GetDate()"); ;
 
-            modelBuilder.Entity<GymClass>().HasData(
-                new GymClass { Id = 1, Description = "GymClassDescription", Name = "GymClassName", Duration = new TimeSpan(1,0,0), StartTime = DateTime.Now.AddHours(1) }
-            );
-
             //modelBuilder.Entity<IdentityRole>().HasData(                
             //    new IdentityRole {  }
             //);

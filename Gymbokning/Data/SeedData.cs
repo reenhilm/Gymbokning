@@ -13,14 +13,16 @@ namespace Gymbokning.Data
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IOptions<PasswordSettings> _options;
+        private readonly ApplicationDbContext _db;
 
-        public SeedData(UserManager<ApplicationUser> userManager, IUserStore<ApplicationUser> userStore, RoleManager<IdentityRole> roleManager, IOptions<PasswordSettings> options)
+        public SeedData(UserManager<ApplicationUser> userManager, IUserStore<ApplicationUser> userStore, RoleManager<IdentityRole> roleManager, IOptions<PasswordSettings> options, ApplicationDbContext db)
         {
             _roleManager = roleManager;
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = GetEmailStore();
             _options = options;
+            _db = db;
         }
         public async Task InitAsync()
         {
@@ -28,22 +30,49 @@ namespace Gymbokning.Data
 
             var roles = GenerateRoles();
             var users = GenerateSeedUserDTO(2, _options);
-            //await db.AddRangeAsync(users);
-            //await db.SaveChangesAsync();
+            var gymClasses = GenerateGymClassesWithoutIds();
+                //await db.AddRangeAsync(users);
+                //await db.SaveChangesAsync();
 
-            //https://stackoverflow.com/questions/18667633/how-can-i-use-async-with-foreach
-            /* fungerar ej:
-              roles.ToList().ForEach(async r => await _roleManager.CreateAsync(r)); */
+                //https://stackoverflow.com/questions/18667633/how-can-i-use-async-with-foreach
+                /* fungerar ej:
+                  roles.ToList().ForEach(async r => await _roleManager.CreateAsync(r)); */
 
-            /* fungerar men fult?
-            using (RoleManager<IdentityRole> rm = _roleManager)
-            { 
-                var tasks = roles.ToList().Select(r => rm.CreateAsync(r));
-                var results = await Task.WhenAll(tasks);
-            }
-            */
+                /* fungerar men fult?
+                using (RoleManager<IdentityRole> rm = _roleManager)
+                { 
+                    var tasks = roles.ToList().Select(r => rm.CreateAsync(r));
+                    var results = await Task.WhenAll(tasks);
+                }
+                */
 
-            await Parallel.ForEachAsync(roles.ToList(), async (i, CancellationToken) => await _roleManager.CreateAsync(i));
+                /*
+                 * även fast alla metoder är asyncrona gick det ej att köra flera samtidigt, felmeddelande:
+                 * 		Message	"A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913."	string
+                 * 		behöver en Transcient DbContext?
+                 */
+
+            //await Parallel.ForEachAsync(roles, async (i, CancellationToken) => await _roleManager.CreateAsync(i));
+            foreach (var role in roles)
+                await _roleManager.CreateAsync(role);
+
+
+                //ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 3 };
+                //await Parallel.ForEachAsync(users, parallelOptions, async (seedUser, CToken) =>
+                //{
+                //    //await _db.GymClass.AddAsync(seedUser, CToken);
+                //    var user = CreateUser();
+                //    await _userStore.SetUserNameAsync(user, seedUser.Email, CToken);
+                //    await _emailStore.SetEmailAsync(user, seedUser.Email, CToken);
+                //    user.FirstName = seedUser.FirstName;
+                //    user.LastName = seedUser.LastName;
+                //    await _userManager.CreateAsync(user, seedUser.Password);
+
+                //    foreach (var role in seedUser.Roles)
+                //        await _userManager.AddToRoleAsync(user, role);
+
+                //    await ConfirmUser(user);
+                //});
 
             foreach (var seedUser in users)
             {
@@ -59,6 +88,9 @@ namespace Gymbokning.Data
 
                 await ConfirmUser(user);
             }
+
+            gymClasses.ToList().ForEach(gc => _db.GymClass.Add(gc));
+            await _db.SaveChangesAsync();
         }
 
         private async Task ConfirmUser(ApplicationUser user)
@@ -111,6 +143,33 @@ namespace Gymbokning.Data
             return members;
         }
         private static IEnumerable<IdentityRole> GenerateRoles() => new List<IdentityRole>() { new IdentityRole() { Name = RoleNames.AdminRole } };
+
+        private static IEnumerable<GymClass> GenerateGymClassesWithoutIds() => new List<GymClass>() {
+            new GymClass() {
+                Duration = TimeSpan.FromMinutes(30),
+                StartTime = DateTime.Now.AddYears(1),
+                Description = "a Future GymClass",
+                Name = "Future GymClass"
+            },
+            new GymClass() {
+                Duration = TimeSpan.FromMinutes(30),
+                StartTime = DateTime.Now.AddYears(1),
+                Description = "a Future GymClass",
+                Name = "Another Future GymClass"
+            },
+            new GymClass() {
+                Duration = TimeSpan.FromMinutes(45),
+                StartTime = DateTime.Now.AddYears(-1),
+                Description = "a Past GymClass",
+                Name = "Past GymClass"
+            },
+            new GymClass() {
+                Duration = TimeSpan.FromMinutes(45),
+                StartTime = DateTime.Now.AddYears(-1),
+                Description = "a Past GymClass",
+                Name = "Another Past GymClass"
+            }
+        };
 
         private static IEnumerable<SeedUserDTO> GenerateSeedUserDTO(int iMembers, IOptions<PasswordSettings> options) => GenerateSeedUserDTO(options).Take(iMembers);
     }
