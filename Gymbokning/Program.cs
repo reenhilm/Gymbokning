@@ -2,6 +2,8 @@ using Gymbokning.AutoMapper;
 using Gymbokning.Data;
 using Gymbokning.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,12 +20,39 @@ builder.Services.Configure<PasswordSettings>(_configuration.GetSection("Identity
 
 //builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 //    .AddCookie(o => o.Events = new CookieAuthenticationEvents()
-//    {
-//        OnValidatePrincipal = async (c) =>
+//    {                
+//        OnValidatePrincipal = async (context) =>
 //        {
-//            c.RejectPrincipal();
+//            var binding = context.HttpContext.Features.Get<ITlsTokenBindingFeature>()?.GetProvidedTokenBindingId();
+//            var tlsTokenBinding = binding == null ? null : Convert.ToBase64String(binding);
+//            var cookie = context.Options.CookieManager.GetRequestCookie(context.HttpContext, context.Options.CookieName);
+//            if (cookie != null)
+//            {
+//                var ticket = context.Options.TicketDataFormat.Unprotect(cookie, tlsTokenBinding);
+
+//                var expiresUtc = ticket.Properties.ExpiresUtc;
+//                var currentUtc = context.Options.SystemClock.UtcNow;
+//                if (expiresUtc != null && expiresUtc.Value < currentUtc)
+//                {
+//                    context.RedirectUri += "&p1=yourparameter";
+//                }
+//            }
+//            context.RejectPrincipal();
 //        }
 //    });
+
+//app.UseCookieAuthentication(new CookieAuthenticationOptions
+//{
+//    AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
+//    LoginPath = new PathString("/Login"),
+
+//    Provider = new CookieAuthenticationProvider
+//    {
+//        OnValidateIdentity = SecurityStampValidator.OnValidateIdentity<UserManager, User>(
+//                        validateInterval: TimeSpan.FromSeconds(0),
+//                        regenerateIdentityCallback: (manager, user) => user.GenerateUserIdentityAsync(manager)
+//                }
+//});
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
@@ -36,13 +65,29 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequireLowercase = false;
     options.Password.RequiredLength = 3;
+    options.User.RequireUniqueEmail = true;
 })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    //builder.Services.ConfigureOptions()
+    //SessionOptions = _configuration<SessionOptions>.GetSection("");
+    //int timeout = (int)section.Timeout.TotalMinutes;
+    options.ExpireTimeSpan = TimeSpan.FromDays(1);
+});
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 builder.Services.AddScoped<ISeedData, SeedData>();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 var app = builder.Build();
 
